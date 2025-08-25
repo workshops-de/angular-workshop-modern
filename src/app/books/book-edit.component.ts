@@ -180,7 +180,7 @@ export class BookEditComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private bookApiService: BookApiClient,
+    private bookApiClient: BookApiClient,
     private toastService: ToastService
   ) {}
 
@@ -192,7 +192,7 @@ export class BookEditComponent implements OnInit {
       return;
     }
 
-    this.bookApiService.getBookById(id).subscribe({
+    this.bookApiClient.getBookById(id).subscribe({
       next: book => {
         this.book = { ...book }; // Create a copy to avoid direct mutation
         this.loading = false;
@@ -211,7 +211,7 @@ export class BookEditComponent implements OnInit {
     }
 
     this.saving = true;
-    this.bookApiService.updateBook(this.book).subscribe({
+    this.bookApiClient.updateBook(this.book).subscribe({
       next: updatedBook => {
         this.saving = false;
         this.toastService.show('Book updated successfully!');

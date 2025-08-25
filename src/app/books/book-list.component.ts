@@ -85,7 +85,7 @@ export class BookListComponent implements OnInit {
   searchTerm: string = '';
   searchTimeout: any;
 
-  constructor(private bookApiService: BookApiClient) {}
+  constructor(private bookApiClient: BookApiClient) {}
 
   ngOnInit(): void {
     this.loadBooks();
@@ -93,7 +93,7 @@ export class BookListComponent implements OnInit {
 
   private loadBooks(search?: string): void {
     this.loading = true;
-    this.bookApiService.getBooks(this.pageSize, search).subscribe({
+    this.bookApiClient.getBooks(this.pageSize, search).subscribe({
       next: books => {
         this.books = books;
         this.loading = false;

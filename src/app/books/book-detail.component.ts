@@ -89,7 +89,7 @@ export class BookDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private bookApiService: BookApiClient
+    private bookApiClient: BookApiClient
   ) {}
 
   ngOnInit(): void {
@@ -100,7 +100,7 @@ export class BookDetailComponent implements OnInit {
       return;
     }
 
-    this.bookApiService.getBookById(id).subscribe({
+    this.bookApiClient.getBookById(id).subscribe({
       next: book => {
         this.book = book;
         this.loading = false;
