@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { BookApiService } from '../shared/book-api.service';
-import { Book } from '../shared/book.interface';
 import { ToastService } from '../shared/toast.service';
+import { Book } from './book';
+import { BookApiClient } from './book-api-client.service';
 
 @Component({
   selector: 'app-book-edit',
@@ -179,7 +179,7 @@ export class BookEditComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private bookApiService: BookApiService,
+    private bookApiService: BookApiClient,
     private toastService: ToastService
   ) {}
 

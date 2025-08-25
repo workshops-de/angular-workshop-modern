@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { BookApiService } from '../shared/book-api.service';
-import { Book } from '../shared/book.interface';
+import { Book } from './book';
+import { BookApiClient } from './book-api-client.service';
 
 @Component({
   selector: 'app-book-detail',
@@ -89,7 +89,7 @@ export class BookDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private bookApiService: BookApiService
+    private bookApiService: BookApiClient
   ) {}
 
   ngOnInit(): void {

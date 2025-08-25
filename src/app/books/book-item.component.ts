@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Book } from '../../shared/book.interface';
+import { Book } from './book';
 
 @Component({
   selector: 'app-book-item',

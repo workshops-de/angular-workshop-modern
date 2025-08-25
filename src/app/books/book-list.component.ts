@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BookApiService } from '../shared/book-api.service';
-import { Book } from '../shared/book.interface';
-import { BookItemComponent } from './book-item/book-item.component';
+import { Book } from './book';
+import { BookApiClient } from './book-api-client.service';
+import { BookItemComponent } from './book-item.component';
 
 @Component({
   selector: 'app-book-list',
@@ -85,7 +85,7 @@ export class BookListComponent implements OnInit {
   searchTerm: string = '';
   searchTimeout: any;
 
-  constructor(private bookApiService: BookApiService) {}
+  constructor(private bookApiService: BookApiClient) {}
 
   ngOnInit(): void {
     this.loadBooks();
