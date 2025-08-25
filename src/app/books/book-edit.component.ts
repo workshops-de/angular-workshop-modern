@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ToastService } from '../shared/toast.service';
 import { Book } from './book';
@@ -9,7 +10,7 @@ import { BookApiClient } from './book-api-client.service';
 @Component({
   selector: 'app-book-edit',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, MatSnackBarModule],
   template: `
     <div class="container mx-auto px-4 py-12 max-w-4xl">
       <h1 class="text-3xl font-bold mb-10 text-blue-700 border-b pb-4 border-gray-200">Edit Book</h1>
