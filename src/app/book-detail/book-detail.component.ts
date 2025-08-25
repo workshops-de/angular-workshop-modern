@@ -44,20 +44,21 @@ import { Book } from '../shared/book.interface';
                 <h1 class="text-3xl font-bold text-gray-800">{{ book.title }}</h1>
                 <p *ngIf="book.subtitle" class="text-xl text-gray-600 mt-2">{{ book.subtitle }}</p>
               </div>
-              <span *ngIf="book.rating" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                Rating: {{ book.rating }}/5
+              <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                {{ book.price }}
               </span>
             </div>
 
             <div class="mb-6">
-              <p class="text-lg text-blue-700">{{ formatAuthors(book.authors) }}</p>
-              <p class="text-gray-600">Published: {{ book.published }}</p>
+              <p class="text-lg text-blue-700">{{ book.author }}</p>
+              <p class="text-gray-600">Publisher: {{ book.publisher }}</p>
               <p class="text-gray-600">ISBN: {{ book.isbn }}</p>
+              <p class="text-gray-600">Pages: {{ book.numPages }}</p>
             </div>
 
-            <div *ngIf="book.description" class="mb-8">
-              <h2 class="text-xl font-semibold text-gray-800 mb-3">Description</h2>
-              <p class="text-gray-700">{{ book.description }}</p>
+            <div *ngIf="book.abstract" class="mb-8">
+              <h2 class="text-xl font-semibold text-gray-800 mb-3">Abstract</h2>
+              <p class="text-gray-700">{{ book.abstract }}</p>
             </div>
 
             <button
@@ -104,17 +105,8 @@ export class BookDetailComponent implements OnInit {
     });
   }
 
-  formatAuthors(authors: string[]): string {
-    if (!authors || authors.length === 0) return 'Unknown Author';
-
-    if (authors.length === 1) {
-      return authors[0];
-    } else if (authors.length === 2) {
-      return authors.join(' & ');
-    } else {
-      return authors.join(', ');
-    }
-  }
+  // No longer needed as we have a single author string
+  // Method left for compatibility until we can remove it from the template
 
   goBack(): void {
     this.router.navigate(['/']);

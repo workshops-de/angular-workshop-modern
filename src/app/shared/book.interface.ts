@@ -2,10 +2,12 @@ export interface Book {
   id: string;
   isbn: string;
   title: string;
-  authors: string[];
-  published: string;
   subtitle?: string;
-  rating?: number;
+  author: string;
+  publisher: string;
+  numPages: number;
+  price: string;
   cover: string;
-  description?: string;
+  abstract: string;
+  userId: number;
 }

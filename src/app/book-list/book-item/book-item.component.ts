@@ -27,9 +27,7 @@ import { Book } from '../../shared/book.interface';
         <p *ngIf="book.subtitle" class="text-sm text-gray-600 mb-2 line-clamp-2">{{ book.subtitle }}</p>
         <div class="text-sm text-gray-700 mt-auto">
           <p>
-            <span *ngIf="book.authors && book.authors.length > 0" class="text-blue-700">{{
-              formatAuthors(book.authors)
-            }}</span>
+            <span class="text-blue-700">{{ book.author }}</span>
           </p>
           <p *ngIf="book.isbn" class="text-xs text-gray-500 mt-2">ISBN: {{ book.isbn }}</p>
         </div>
@@ -48,13 +46,5 @@ import { Book } from '../../shared/book.interface';
 export class BookItemComponent {
   @Input() book!: Book;
 
-  formatAuthors(authors: string[]): string {
-    if (authors.length === 1) {
-      return authors[0];
-    } else if (authors.length === 2) {
-      return authors.join(' & ');
-    } else {
-      return authors.join(', ');
-    }
-  }
+  // No longer needed as we have a single author field
 }
