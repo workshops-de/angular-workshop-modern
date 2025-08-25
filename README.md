@@ -1,59 +1,83 @@
-# AngularWorkshopModern
+<h1 align="center">Modern Angular Workshop</h1>
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.0.
+<p align="center">
+  <img alt="workshops-de-logo-blue" src="docs/logo-workshops-de.png" width="120">
+  <br>
+  <em>The best way to stay up to date with Angular</em>
+  <br>
+</p>
 
-## Development server
+<p align="center">
+  <a href="https://workshops.de/seminare-schulungen-kurse/upgrade-to-modern-angular" target="_blank"><strong>workshops.de</strong></a>
+  <br>
+</p>
 
-To start a local development server, run:
+## Local Development
 
-```bash
-ng serve
-```
+| Command       | Description                                      |
+| ------------- | ------------------------------------------------ |
+| `npm install` | Installs the packages to develop the Angular app |
+| `npm start`   | Starts the Angular app                           |
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## The API
 
-## Code scaffolding
+| Command              | Description                                       |
+| -------------------- | ------------------------------------------------- |
+| `npx bookmonkey-api` | Installs and starts the HTTP API "Bookmonkey API" |
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+The API provides fake data that you can use in your Angular application.
 
-```bash
-ng generate component component-name
-```
+> [!NOTE]
+> The API starts at http://localhost:4730.
+> When you open this page, you’ll find documentation for all endpoints. 🚀
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## VS Code
 
-```bash
-ng generate --help
-```
+If you are using [VS Code](https://code.visualstudio.com/) as you editor of choice, you might see a popup after opening this repository.
+We added a few plugin recommendations to simplify writing code during the workshop:
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+1. Angular Language Service - Adds better syntax-highlighting & automatic refactorings
+1. Prettier - Formats your code automatically in the same way across your project.
 
 ## Additional Resources
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+> From https://github.com/angular/angular
+
+### Quickstart
+
+[Get started in 5 minutes][quickstart].
+
+### Documentation
+
+Get started with Angular, learn the fundamentals, and explore advanced topics on our documentation website.
+
+- [Getting Started][quickstart]
+- [Documentation][documentation]
+- [Angular Command Line (CLI)][cli]
+- [Architecture][architecture]
+- [Components and Templates][componentstemplates]
+- [Forms][forms]
+- [Angular Material][angularmaterial]
+- [API][api]
+
+#### Advanced
+
+- [Angular Elements][angularelements]
+- [Server Side Rendering][ssr]
+- [Schematics][schematics]
+- [Lazy Loading][lazyloading]
+
+[eslint]: https://eslint.org/
+[quickstart]: https://angular.dev/tutorials/learn-angular
+[ng]: https://angular.dev
+[documentation]: https://angular.dev/overview
+[angularmaterial]: https://material.angular.io/
+[cli]: https://angular.dev/tools/cli
+[architecture]: https://angular.dev/essentials
+[componentstemplates]: https://angular.dev/tutorials/learn-angular/1-components-in-angular
+[forms]: https://angular.dev/tutorials/learn-angular/15-forms
+[api]: https://angular.dev/api
+[angularelements]: https://angular.dev/guide/elements
+[ssr]: https://angular.dev/guide/ssr
+[schematics]: https://angular.dev/tools/cli/schematics
+[lazyloading]: https://angular.dev/guide/ngmodules/lazy-loading
