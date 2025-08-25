@@ -7,29 +7,31 @@ import { Book } from '../../shared/book.interface';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      <div class="relative pb-2/3">
+    <div
+      class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full"
+    >
+      <div class="relative aspect-[3/4] overflow-hidden">
         @if (book.cover) {
-          <img [src]="book.cover" [alt]="book.title" class="w-full h-64 object-cover" />
+          <img [src]="book.cover" [alt]="book.title" class="w-full h-full object-contain bg-gray-100" />
         } @else {
-          <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
-            <span class="text-gray-500">No image available</span>
+          <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+            <span class="text-gray-500 text-sm font-medium">No cover available</span>
           </div>
         }
       </div>
-      <div class="p-4">
-        <h2 class="text-lg font-semibold text-gray-800 mb-1">{{ book.title }}</h2>
+      <div class="p-5 flex flex-col flex-grow">
+        <h2 class="text-lg font-semibold text-gray-800 mb-1 line-clamp-2">{{ book.title }}</h2>
         @if (book.subtitle) {
-          <p class="text-sm text-gray-600 mb-2">{{ book.subtitle }}</p>
+          <p class="text-sm text-gray-600 mb-2 line-clamp-2">{{ book.subtitle }}</p>
         }
-        <div class="text-sm text-gray-700 mt-2">
+        <div class="text-sm text-gray-700 mt-auto">
           <p>
             @if (book.authors && book.authors.length > 0) {
-              <span>By: {{ formatAuthors(book.authors) }}</span>
+              <span class="text-blue-700">{{ formatAuthors(book.authors) }}</span>
             }
           </p>
           @if (book.isbn) {
-            <p class="text-xs text-gray-500 mt-1">ISBN: {{ book.isbn }}</p>
+            <p class="text-xs text-gray-500 mt-2">ISBN: {{ book.isbn }}</p>
           }
         </div>
       </div>
