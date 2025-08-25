@@ -1,5 +1,4 @@
-
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -14,7 +13,7 @@ import { BookApiClient } from './book-api-client.service';
   template: `
     <div class="container mx-auto px-4 py-12 max-w-4xl">
       <h1 class="text-3xl font-bold mb-10 text-blue-700 border-b pb-4 border-gray-200">Edit Book</h1>
-    
+
       @if (loading) {
         <div class="flex justify-center items-center py-20">
           <div class="animate-pulse flex flex-col items-center">
@@ -25,25 +24,21 @@ import { BookApiClient } from './book-api-client.service';
           </div>
         </div>
       }
-    
+
       @if (!loading && error) {
         <div class="p-6 text-center bg-red-50 rounded-lg">
           <p class="text-red-700 font-medium text-lg mb-2">{{ error }}</p>
           <button
             (click)="goBack()"
             class="mt-4 px-6 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-            >
+          >
             Back to Books
           </button>
         </div>
       }
-    
+
       @if (!loading && !error && book) {
-        <form
-          #bookForm="ngForm"
-          (ngSubmit)="onSubmit()"
-          class="bg-white rounded-lg shadow-lg overflow-hidden p-8"
-          >
+        <form #bookForm="ngForm" (ngSubmit)="onSubmit()" class="bg-white rounded-lg shadow-lg overflow-hidden p-8">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="md:col-span-2">
               <label for="title" class="block text-gray-700 font-medium mb-2">Title</label>
@@ -54,7 +49,7 @@ import { BookApiClient } from './book-api-client.service';
                 [(ngModel)]="book.title"
                 required
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              />
             </div>
             <div class="md:col-span-2">
               <label for="subtitle" class="block text-gray-700 font-medium mb-2">Subtitle</label>
@@ -64,7 +59,7 @@ import { BookApiClient } from './book-api-client.service';
                 name="subtitle"
                 [(ngModel)]="book.subtitle"
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              />
             </div>
             <div>
               <label for="isbn" class="block text-gray-700 font-medium mb-2">ISBN</label>
@@ -75,7 +70,7 @@ import { BookApiClient } from './book-api-client.service';
                 [(ngModel)]="book.isbn"
                 required
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              />
             </div>
             <div>
               <label for="author" class="block text-gray-700 font-medium mb-2">Author</label>
@@ -86,7 +81,7 @@ import { BookApiClient } from './book-api-client.service';
                 [(ngModel)]="book.author"
                 required
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              />
             </div>
             <div>
               <label for="publisher" class="block text-gray-700 font-medium mb-2">Publisher</label>
@@ -97,7 +92,7 @@ import { BookApiClient } from './book-api-client.service';
                 [(ngModel)]="book.publisher"
                 required
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              />
             </div>
             <div>
               <label for="numPages" class="block text-gray-700 font-medium mb-2">Pages</label>
@@ -109,7 +104,7 @@ import { BookApiClient } from './book-api-client.service';
                 required
                 min="1"
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              />
             </div>
             <div>
               <label for="price" class="block text-gray-700 font-medium mb-2">Price</label>
@@ -120,7 +115,7 @@ import { BookApiClient } from './book-api-client.service';
                 [(ngModel)]="book.price"
                 required
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              />
             </div>
             <div>
               <label for="cover" class="block text-gray-700 font-medium mb-2">Cover URL</label>
@@ -130,7 +125,7 @@ import { BookApiClient } from './book-api-client.service';
                 name="cover"
                 [(ngModel)]="book.cover"
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              />
             </div>
             <div class="md:col-span-2">
               <label for="abstract" class="block text-gray-700 font-medium mb-2">Abstract</label>
@@ -148,36 +143,34 @@ import { BookApiClient } from './book-api-client.service';
               type="button"
               (click)="goBack()"
               class="px-6 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-              >
+            >
               Cancel
             </button>
             <button
               type="submit"
               [disabled]="bookForm.invalid || saving"
               class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-              >
+            >
               {{ saving ? 'Saving...' : 'Save Changes' }}
             </button>
           </div>
         </form>
       }
     </div>
-    `
+  `
 })
 export class BookEditComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private bookApiClient = inject(BookApiClient);
+  private toastService = inject(ToastService);
+
   book: Book | null = null;
   loading: boolean = true;
   saving: boolean = false;
   error: string | null = null;
 
   @ViewChild('bookForm') bookForm!: NgForm;
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private bookApiClient: BookApiClient,
-    private toastService: ToastService
-  ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');

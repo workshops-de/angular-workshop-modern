@@ -1,5 +1,4 @@
-
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Book } from './book';
 import { BookApiClient } from './book-api-client.service';
@@ -20,19 +19,19 @@ import { BookApiClient } from './book-api-client.service';
           </div>
         </div>
       }
-    
+
       @if (!loading && error) {
         <div class="p-6 text-center bg-red-50 rounded-lg">
           <p class="text-red-700 font-medium text-lg mb-2">{{ error }}</p>
           <button
             (click)="goBack()"
             class="mt-4 px-6 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-            >
+          >
             Back to Books
           </button>
         </div>
       }
-    
+
       @if (!loading && !error && book) {
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
           <div class="flex flex-col md:flex-row">
@@ -74,13 +73,13 @@ import { BookApiClient } from './book-api-client.service';
                 <button
                   (click)="goBack()"
                   class="px-6 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-                  >
+                >
                   Back to Books
                 </button>
                 <a
                   [routerLink]="['/books', book.id, 'edit']"
                   class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors inline-flex items-center"
-                  >
+                >
                   Edit Book
                 </a>
               </div>
@@ -89,18 +88,16 @@ import { BookApiClient } from './book-api-client.service';
         </div>
       }
     </div>
-    `
+  `
 })
 export class BookDetailComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private bookApiClient = inject(BookApiClient);
+
   book: Book | null = null;
   loading: boolean = true;
   error: string | null = null;
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private bookApiClient: BookApiClient
-  ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');

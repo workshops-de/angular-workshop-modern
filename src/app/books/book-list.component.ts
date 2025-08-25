@@ -1,5 +1,4 @@
-
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Book } from './book';
 import { BookApiClient } from './book-api-client.service';
@@ -12,7 +11,7 @@ import { BookItemComponent } from './book-item.component';
   template: `
     <div class="container mx-auto px-4 py-12 max-w-7xl">
       <h1 class="text-3xl font-bold mb-10 text-blue-700 border-b pb-4 border-gray-200">Book Collection</h1>
-    
+
       <div class="mb-6">
         <div class="flex items-center border-b-2 border-gray-300 py-2">
           <input
@@ -21,7 +20,7 @@ import { BookItemComponent } from './book-item.component';
             (ngModelChange)="onSearchChange()"
             placeholder="Search for books..."
             class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
-            />
+          />
           @if (searchTerm) {
             <button (click)="clearSearch()" class="flex-shrink-0 text-gray-500 hover:text-gray-700">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,7 +30,7 @@ import { BookItemComponent } from './book-item.component';
           }
         </div>
       </div>
-    
+
       @if (loading) {
         <div class="flex justify-center items-center py-20">
           <div class="animate-pulse flex flex-col items-center">
@@ -42,7 +41,7 @@ import { BookItemComponent } from './book-item.component';
           </div>
         </div>
       }
-    
+
       @if (!loading) {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
           @for (book of books; track trackById($index, book)) {
@@ -51,20 +50,20 @@ import { BookItemComponent } from './book-item.component';
           @if (books.length === 0) {
             <div
               class="col-span-full flex flex-col items-center justify-center py-16 text-center bg-gray-50 rounded-xl"
-              >
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-16 w-16 text-gray-400 mb-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                >
+              >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="1.5"
                   d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
+                />
               </svg>
               <p class="text-xl font-medium text-gray-600 mb-2">
                 {{ searchTerm ? 'No books match your search' : 'No books available' }}
@@ -76,7 +75,7 @@ import { BookItemComponent } from './book-item.component';
                 <button
                   (click)="clearSearch()"
                   class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200"
-                  >
+                >
                   Clear Search
                 </button>
               }
@@ -85,16 +84,16 @@ import { BookItemComponent } from './book-item.component';
         </div>
       }
     </div>
-    `
+  `
 })
 export class BookListComponent implements OnInit {
+  private bookApiClient = inject(BookApiClient);
+
   @Input() pageSize: number = 10;
   books: Book[] = [];
   loading: boolean = true;
   searchTerm: string = '';
   searchTimeout: any;
-
-  constructor(private bookApiClient: BookApiClient) {}
 
   ngOnInit(): void {
     this.loadBooks();
