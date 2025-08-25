@@ -1,0 +1,22 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Book } from './book.interface';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class BookApiService {
+  private readonly apiUrl = 'http://localhost:4730/books';
+
+  constructor(private http: HttpClient) {}
+
+  getBooks(pageSize: number = 10): Observable<Book[]> {
+    const params = new HttpParams().set('_limit', pageSize.toString());
+    return this.http.get<Book[]>(this.apiUrl, { params });
+  }
+
+  getBookById(id: string): Observable<Book> {
+    return this.http.get<Book>(`${this.apiUrl}/${id}`);
+  }
+}
