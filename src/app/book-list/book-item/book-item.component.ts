@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { Book } from '../../shared/book.interface';
 
 @Component({
   selector: 'app-book-item',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div
       class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full"
@@ -31,6 +32,14 @@ import { Book } from '../../shared/book.interface';
             }}</span>
           </p>
           <p *ngIf="book.isbn" class="text-xs text-gray-500 mt-2">ISBN: {{ book.isbn }}</p>
+        </div>
+        <div class="px-5 pb-4 mt-2">
+          <a
+            [routerLink]="['/books', book.id]"
+            class="block w-full text-center py-2 text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
+          >
+            View Details
+          </a>
         </div>
       </div>
     </div>

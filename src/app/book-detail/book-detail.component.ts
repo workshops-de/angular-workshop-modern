@@ -1,0 +1,122 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { BookApiService } from '../shared/book-api.service';
+import { Book } from '../shared/book.interface';
+
+@Component({
+  selector: 'app-book-detail',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  template: `
+    <div class="container mx-auto px-4 py-12 max-w-4xl">
+      <div *ngIf="loading" class="flex justify-center items-center py-20">
+        <div class="animate-pulse flex flex-col items-center">
+          <div
+            class="h-16 w-16 rounded-full border-4 border-t-blue-700 border-r-blue-700 border-b-gray-200 border-l-gray-200 animate-spin"
+          ></div>
+          <p class="mt-4 text-gray-600">Loading book details...</p>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && error" class="p-6 text-center bg-red-50 rounded-lg">
+        <p class="text-red-700 font-medium text-lg mb-2">{{ error }}</p>
+        <button
+          (click)="goBack()"
+          class="mt-4 px-6 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
+        >
+          Back to Books
+        </button>
+      </div>
+
+      <div *ngIf="!loading && !error && book" class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="flex flex-col md:flex-row">
+          <div class="w-full md:w-1/3 bg-gray-100 p-6 flex items-center justify-center">
+            <img *ngIf="book.cover" [src]="book.cover" [alt]="book.title" class="max-w-full max-h-96 object-contain" />
+            <div *ngIf="!book.cover" class="w-full h-64 flex items-center justify-center bg-gray-200 text-gray-500">
+              No cover available
+            </div>
+          </div>
+
+          <div class="w-full md:w-2/3 p-8">
+            <div class="flex justify-between items-start mb-6">
+              <div>
+                <h1 class="text-3xl font-bold text-gray-800">{{ book.title }}</h1>
+                <p *ngIf="book.subtitle" class="text-xl text-gray-600 mt-2">{{ book.subtitle }}</p>
+              </div>
+              <span *ngIf="book.rating" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                Rating: {{ book.rating }}/5
+              </span>
+            </div>
+
+            <div class="mb-6">
+              <p class="text-lg text-blue-700">{{ formatAuthors(book.authors) }}</p>
+              <p class="text-gray-600">Published: {{ book.published }}</p>
+              <p class="text-gray-600">ISBN: {{ book.isbn }}</p>
+            </div>
+
+            <div *ngIf="book.description" class="mb-8">
+              <h2 class="text-xl font-semibold text-gray-800 mb-3">Description</h2>
+              <p class="text-gray-700">{{ book.description }}</p>
+            </div>
+
+            <button
+              (click)="goBack()"
+              class="px-6 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
+            >
+              Back to Books
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+})
+export class BookDetailComponent implements OnInit {
+  book: Book | null = null;
+  loading: boolean = true;
+  error: string | null = null;
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private bookApiService: BookApiService
+  ) {}
+
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      this.loading = false;
+      this.error = 'Book ID not found';
+      return;
+    }
+
+    this.bookApiService.getBookById(id).subscribe({
+      next: book => {
+        this.book = book;
+        this.loading = false;
+      },
+      error: err => {
+        console.error('Error fetching book details:', err);
+        this.loading = false;
+        this.error = 'Could not load book details. The book may not exist.';
+      }
+    });
+  }
+
+  formatAuthors(authors: string[]): string {
+    if (!authors || authors.length === 0) return 'Unknown Author';
+
+    if (authors.length === 1) {
+      return authors[0];
+    } else if (authors.length === 2) {
+      return authors.join(' & ');
+    } else {
+      return authors.join(', ');
+    }
+  }
+
+  goBack(): void {
+    this.router.navigate(['/']);
+  }
+}
