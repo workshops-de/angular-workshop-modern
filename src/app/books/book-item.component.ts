@@ -1,4 +1,3 @@
-
 import { Component, Input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Book } from './book';
@@ -10,14 +9,10 @@ import { Book } from './book';
   template: `
     <div
       class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full"
-      >
+    >
       <div class="relative aspect-[3/4] overflow-hidden">
         @if (book.cover) {
-          <img
-            [src]="book.cover"
-            [alt]="book.title"
-            class="w-full h-full object-contain bg-gray-100"
-            />
+          <img [src]="book.cover" [alt]="book.title" class="w-full h-full object-contain bg-gray-100" />
         }
         @if (!book.cover) {
           <div class="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -42,22 +37,20 @@ import { Book } from './book';
           <a
             [routerLink]="['/books', book.id]"
             class="block w-full text-center py-2 text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
-            >
+          >
             View Details
           </a>
           <a
             [routerLink]="['/books', book.id, 'edit']"
             class="block w-full text-center py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-            >
+          >
             Edit Book
           </a>
         </div>
       </div>
     </div>
-    `
+  `
 })
 export class BookItemComponent {
   @Input() book!: Book;
-
-  // No longer needed as we have a single author field
 }
