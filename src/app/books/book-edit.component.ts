@@ -212,10 +212,9 @@ export class BookEditComponent implements OnInit {
 
     this.saving = true;
     this.bookApiClient.updateBook(this.book).subscribe({
-      next: updatedBook => {
+      next: () => {
         this.saving = false;
         this.toastService.show('Book updated successfully!');
-        this.router.navigate(['/books', updatedBook.id]);
       },
       error: err => {
         console.error('Error updating book:', err);
