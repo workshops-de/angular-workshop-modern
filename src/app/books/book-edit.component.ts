@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -37,7 +37,7 @@ import { BookApiClient } from './book-api-client.service';
         </div>
       }
 
-      @if (!loading && !error && book) {
+      @if (!loading && !error && book()) {
         <form #bookForm="ngForm" (ngSubmit)="onSubmit()" class="bg-white rounded-lg shadow-lg overflow-hidden p-8">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="md:col-span-2">
@@ -46,7 +46,7 @@ import { BookApiClient } from './book-api-client.service';
                 type="text"
                 id="title"
                 name="title"
-                [(ngModel)]="book.title"
+                [(ngModel)]="book().title"
                 required
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -57,7 +57,7 @@ import { BookApiClient } from './book-api-client.service';
                 type="text"
                 id="subtitle"
                 name="subtitle"
-                [(ngModel)]="book.subtitle"
+                [(ngModel)]="book().subtitle"
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -67,7 +67,7 @@ import { BookApiClient } from './book-api-client.service';
                 type="text"
                 id="isbn"
                 name="isbn"
-                [(ngModel)]="book.isbn"
+                [(ngModel)]="book().isbn"
                 required
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -78,7 +78,7 @@ import { BookApiClient } from './book-api-client.service';
                 type="text"
                 id="author"
                 name="author"
-                [(ngModel)]="book.author"
+                [(ngModel)]="book().author"
                 required
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -89,7 +89,7 @@ import { BookApiClient } from './book-api-client.service';
                 type="text"
                 id="publisher"
                 name="publisher"
-                [(ngModel)]="book.publisher"
+                [(ngModel)]="book().publisher"
                 required
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -100,7 +100,7 @@ import { BookApiClient } from './book-api-client.service';
                 type="number"
                 id="numPages"
                 name="numPages"
-                [(ngModel)]="book.numPages"
+                [(ngModel)]="book().numPages"
                 required
                 min="1"
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -112,7 +112,7 @@ import { BookApiClient } from './book-api-client.service';
                 type="text"
                 id="price"
                 name="price"
-                [(ngModel)]="book.price"
+                [(ngModel)]="book().price"
                 required
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -123,7 +123,7 @@ import { BookApiClient } from './book-api-client.service';
                 type="text"
                 id="cover"
                 name="cover"
-                [(ngModel)]="book.cover"
+                [(ngModel)]="book().cover"
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -132,7 +132,7 @@ import { BookApiClient } from './book-api-client.service';
               <textarea
                 id="abstract"
                 name="abstract"
-                [(ngModel)]="book.abstract"
+                [(ngModel)]="book().abstract"
                 rows="4"
                 class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               ></textarea>
@@ -165,7 +165,7 @@ export class BookEditComponent implements OnInit {
   private bookApiClient = inject(BookApiClient);
   private toastService = inject(ToastService);
 
-  book: Book | null = null;
+  book = signal<Book>({} as Book);
   loading: boolean = true;
   saving: boolean = false;
   error: string | null = null;
@@ -182,7 +182,7 @@ export class BookEditComponent implements OnInit {
 
     this.bookApiClient.getBookById(id).subscribe({
       next: book => {
-        this.book = { ...book }; // Create a copy to avoid direct mutation
+        this.book.set(book);
         this.loading = false;
       },
       error: err => {
@@ -194,12 +194,13 @@ export class BookEditComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.bookForm.invalid || !this.book) {
+    const book = this.book();
+    if (this.bookForm.invalid || !book) {
       return;
     }
 
     this.saving = true;
-    this.bookApiClient.updateBook(this.book).subscribe({
+    this.bookApiClient.updateBook(book).subscribe({
       next: () => {
         this.saving = false;
         this.toastService.show('Book updated successfully!');
@@ -213,6 +214,6 @@ export class BookEditComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/books', this.book?.id || '']);
+    this.router.navigate(['/books', this.book()?.id || '']);
   }
 }
