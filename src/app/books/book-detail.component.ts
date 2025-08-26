@@ -1,5 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Component, computed, inject, input } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { Router, RouterModule } from '@angular/router';
+import { tap } from 'rxjs';
 import { Book } from './book';
 import { BookApiClient } from './book-api-client.service';
 
@@ -8,6 +10,8 @@ import { BookApiClient } from './book-api-client.service';
   standalone: true,
   imports: [RouterModule],
   template: `
+    @let book = bookDetails();
+
     <div class="container mx-auto px-4 py-12 max-w-4xl">
       @if (loading) {
         <div class="flex justify-center items-center py-20">
@@ -90,38 +94,30 @@ import { BookApiClient } from './book-api-client.service';
     </div>
   `
 })
-export class BookDetailComponent implements OnInit {
-  private route = inject(ActivatedRoute);
+export class BookDetailComponent {
   private router = inject(Router);
   private bookApiClient = inject(BookApiClient);
 
-  book: Book | null = null;
+  id = input<string>('');
+
   loading: boolean = true;
   error: string | null = null;
 
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.loading = false;
-      this.error = 'Book ID not found';
-      return;
-    }
-
-    this.bookApiClient.getBookById(id).subscribe({
-      next: book => {
-        this.book = book;
-        this.loading = false;
-      },
-      error: err => {
-        console.error('Error fetching book details:', err);
-        this.loading = false;
-        this.error = 'Could not load book details. The book may not exist.';
-      }
-    });
-  }
-
-  // No longer needed as we have a single author string
-  // Method left for compatibility until we can remove it from the template
+  bookDetails = computed(() => this.bookResource.value());
+  bookResource = rxResource({
+    params: () => ({ id: this.id() }),
+    stream: ({ params }) =>
+      this.bookApiClient.getBookById(params.id).pipe(
+        tap({
+          next: () => (this.loading = false),
+          error: () => {
+            this.loading = false;
+            this.error = 'Could not load book details. The book may not exist.';
+          }
+        })
+      ),
+    defaultValue: {} as Book
+  });
 
   goBack(): void {
     this.router.navigate(['/']);
