@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, ViewChild, effect, inject, input, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { tap } from 'rxjs';
 import { ToastService } from '../shared/toast.service';
 import { Book } from './book';
@@ -161,32 +161,31 @@ import { BookApiClient } from './book-api-client.service';
     </div>
   `
 })
-export class BookEditComponent implements OnInit {
-  private route = inject(ActivatedRoute);
+export class BookEditComponent {
   private router = inject(Router);
   private bookApiClient = inject(BookApiClient);
   private toastService = inject(ToastService);
 
-  book = toSignal(
-    this.bookApiClient
-      .getBookById(this.route.snapshot.paramMap.get('id') ?? '')
-      .pipe(tap({ next: () => (this.loading = false), error: () => (this.loading = false) })),
-    { initialValue: {} as Book }
-  );
+  id = input<string>('');
 
   loading: boolean = true;
   saving: boolean = false;
   error: string | null = null;
 
+  book = signal<Book>({} as Book);
+  bookResource = rxResource({
+    params: () => ({ id: this.id() }),
+    stream: ({ params }) =>
+      this.bookApiClient
+        .getBookById(params.id)
+        .pipe(tap({ next: () => (this.loading = false), error: () => (this.loading = false) })),
+    defaultValue: {} as Book
+  });
+
   @ViewChild('bookForm') bookForm!: NgForm;
 
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.loading = false;
-      this.error = 'Book ID not found';
-      return;
-    }
+  constructor() {
+    effect(() => this.fillBookForForm());
   }
 
   onSubmit(): void {
@@ -210,6 +209,16 @@ export class BookEditComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/books', this.book()?.id || '']);
+    this.router.navigate(['/books', this.book().id]);
+  }
+
+  private fillBookForForm(): void {
+    const isResourceCurrentlyLoading = this.bookResource.isLoading();
+
+    if (isResourceCurrentlyLoading) return;
+
+    const book = this.bookResource.value();
+
+    this.book.set(book);
   }
 }
