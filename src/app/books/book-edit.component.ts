@@ -1,7 +1,9 @@
-import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { tap } from 'rxjs';
 import { ToastService } from '../shared/toast.service';
 import { Book } from './book';
 import { BookApiClient } from './book-api-client.service';
@@ -165,7 +167,13 @@ export class BookEditComponent implements OnInit {
   private bookApiClient = inject(BookApiClient);
   private toastService = inject(ToastService);
 
-  book = signal<Book>({} as Book);
+  book = toSignal(
+    this.bookApiClient
+      .getBookById(this.route.snapshot.paramMap.get('id') ?? '')
+      .pipe(tap({ next: () => (this.loading = false), error: () => (this.loading = false) })),
+    { initialValue: {} as Book }
+  );
+
   loading: boolean = true;
   saving: boolean = false;
   error: string | null = null;
@@ -179,18 +187,6 @@ export class BookEditComponent implements OnInit {
       this.error = 'Book ID not found';
       return;
     }
-
-    this.bookApiClient.getBookById(id).subscribe({
-      next: book => {
-        this.book.set(book);
-        this.loading = false;
-      },
-      error: err => {
-        console.error('Error fetching book:', err);
-        this.loading = false;
-        this.error = 'Could not load book details. The book may not exist.';
-      }
-    });
   }
 
   onSubmit(): void {
