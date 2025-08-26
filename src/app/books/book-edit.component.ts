@@ -145,10 +145,10 @@ import { BookApiClient } from './book-api-client.service';
             </button>
             <button
               type="submit"
-              [disabled]="bookForm.invalid || saving"
+              [disabled]="bookForm.invalid || saving()"
               class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
             >
-              {{ saving ? 'Saving...' : 'Save Changes' }}
+              {{ saving() ? 'Saving...' : 'Save Changes' }}
             </button>
           </div>
         </form>
@@ -163,7 +163,7 @@ export class BookEditComponent {
 
   id = input<string>('');
 
-  saving = false;
+  saving = signal(false);
 
   book = signal<Book>({} as Book);
   bookResource = rxResource({
@@ -184,15 +184,15 @@ export class BookEditComponent {
       return;
     }
 
-    this.saving = true;
+    this.saving.set(true);
     this.bookApiClient.updateBook(book).subscribe({
       next: () => {
-        this.saving = false;
+        this.saving.set(false);
         this.toastService.show('Book updated successfully!');
       },
       error: err => {
         console.error('Error updating book:', err);
-        this.saving = false;
+        this.saving.set(false);
         this.toastService.show('Error updating book. Please try again.', 5000);
       }
     });
