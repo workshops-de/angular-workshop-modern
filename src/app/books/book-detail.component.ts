@@ -1,15 +1,16 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Component, computed, inject, input } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { Router, RouterLink } from '@angular/router';
 import { Book } from './book';
 import { BookApiClient } from './book-api-client.service';
 
 @Component({
   selector: 'app-book-detail',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterLink],
   template: `
     <div class="container mx-auto px-4 py-12 max-w-4xl">
-      @if (loading) {
+      @if (bookResource.isLoading()) {
         <div class="flex justify-center items-center py-20">
           <div class="animate-pulse flex flex-col items-center">
             <div
@@ -18,9 +19,7 @@ import { BookApiClient } from './book-api-client.service';
             <p class="mt-4 text-gray-600">Loading book details...</p>
           </div>
         </div>
-      }
-
-      @if (!loading && error) {
+      } @else if (bookResource.error(); as error) {
         <div class="p-6 text-center bg-red-50 rounded-lg">
           <p class="text-red-700 font-medium text-lg mb-2">{{ error }}</p>
           <button
@@ -30,9 +29,7 @@ import { BookApiClient } from './book-api-client.service';
             Back to Books
           </button>
         </div>
-      }
-
-      @if (!loading && !error && book) {
+      } @else if (bookResource.value(); as book) {
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
           <div class="flex flex-col md:flex-row">
             <div class="w-full md:w-1/3 bg-gray-100 p-6 flex items-center justify-center">
@@ -90,38 +87,18 @@ import { BookApiClient } from './book-api-client.service';
     </div>
   `
 })
-export class BookDetailComponent implements OnInit {
-  private route = inject(ActivatedRoute);
+export class BookDetailComponent {
   private router = inject(Router);
   private bookApiClient = inject(BookApiClient);
 
-  book: Book | null = null;
-  loading: boolean = true;
-  error: string | null = null;
+  id = input<string>('');
 
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.loading = false;
-      this.error = 'Book ID not found';
-      return;
-    }
-
-    this.bookApiClient.getBookById(id).subscribe({
-      next: book => {
-        this.book = book;
-        this.loading = false;
-      },
-      error: err => {
-        console.error('Error fetching book details:', err);
-        this.loading = false;
-        this.error = 'Could not load book details. The book may not exist.';
-      }
-    });
-  }
-
-  // No longer needed as we have a single author string
-  // Method left for compatibility until we can remove it from the template
+  bookDetails = computed(() => this.bookResource.value());
+  bookResource = rxResource({
+    params: () => ({ id: this.id() }),
+    stream: ({ params }) => this.bookApiClient.getBookById(params.id),
+    defaultValue: {} as Book
+  });
 
   goBack(): void {
     this.router.navigate(['/']);

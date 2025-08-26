@@ -1,6 +1,6 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, inject, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Book } from './book';
 import { BookApiClient } from './book-api-client.service';
 import { BookItemComponent } from './book-item.component';
 
@@ -16,12 +16,12 @@ import { BookItemComponent } from './book-item.component';
         <div class="flex items-center border-b-2 border-gray-300 py-2">
           <input
             type="text"
-            [(ngModel)]="searchTerm"
-            (ngModelChange)="onSearchChange()"
+            [ngModel]="searchTerm()"
+            (ngModelChange)="onSearchChange($event)"
             placeholder="Search for books..."
             class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
           />
-          @if (searchTerm) {
+          @if (searchTerm()) {
             <button (click)="clearSearch()" class="flex-shrink-0 text-gray-500 hover:text-gray-700">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -31,7 +31,7 @@ import { BookItemComponent } from './book-item.component';
         </div>
       </div>
 
-      @if (loading) {
+      @if (booksResource.isLoading()) {
         <div class="flex justify-center items-center py-20">
           <div class="animate-pulse flex flex-col items-center">
             <div
@@ -42,12 +42,11 @@ import { BookItemComponent } from './book-item.component';
         </div>
       }
 
-      @if (!loading) {
+      @if (booksResource.hasValue()) {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-          @for (book of books; track trackById($index, book)) {
+          @for (book of booksResource.value(); track book.id) {
             <app-book-item [book]="book"></app-book-item>
-          }
-          @if (books.length === 0) {
+          } @empty {
             <div
               class="col-span-full flex flex-col items-center justify-center py-16 text-center bg-gray-50 rounded-xl"
             >
@@ -66,12 +65,12 @@ import { BookItemComponent } from './book-item.component';
                 />
               </svg>
               <p class="text-xl font-medium text-gray-600 mb-2">
-                {{ searchTerm ? 'No books match your search' : 'No books available' }}
+                {{ searchTerm() ? 'No books match your search' : 'No books available' }}
               </p>
               <p class="text-gray-500">
-                {{ searchTerm ? 'Try different search terms or clear the search' : 'Check back later' }}
+                {{ searchTerm() ? 'Try different search terms or clear the search' : 'Check back later' }}
               </p>
-              @if (searchTerm) {
+              @if (searchTerm()) {
                 <button
                   (click)="clearSearch()"
                   class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200"
@@ -86,47 +85,28 @@ import { BookItemComponent } from './book-item.component';
     </div>
   `
 })
-export class BookListComponent implements OnInit {
+export class BookListComponent {
   private bookApiClient = inject(BookApiClient);
 
   @Input() pageSize: number = 10;
-  books: Book[] = [];
-  loading: boolean = true;
-  searchTerm: string = '';
   searchTimeout: any;
 
-  ngOnInit(): void {
-    this.loadBooks();
-  }
+  searchTerm = signal<string>('');
+  booksResource = rxResource({
+    params: () => ({ pageSize: this.pageSize, search: this.searchTerm() }),
+    stream: ({ params }) => this.bookApiClient.getBooks(params.pageSize, params.search),
+    defaultValue: []
+  });
 
-  private loadBooks(search?: string): void {
-    this.loading = true;
-    this.bookApiClient.getBooks(this.pageSize, search).subscribe({
-      next: books => {
-        this.books = books;
-        this.loading = false;
-      },
-      error: error => {
-        console.error('Error fetching books:', error);
-        this.loading = false;
-      }
-    });
-  }
-
-  onSearchChange(): void {
+  onSearchChange(newSearchTerm: string): void {
     // Debounce search to avoid too many API calls while typing
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
-      this.loadBooks(this.searchTerm);
+      this.searchTerm.set(newSearchTerm);
     }, 300);
   }
 
   clearSearch(): void {
-    this.searchTerm = '';
-    this.loadBooks();
-  }
-
-  trackById(index: number, book: Book): string {
-    return book.id;
+    this.searchTerm.set('');
   }
 }
