@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, inject, signal, input } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { BookApiClient } from './book-api-client.service';
@@ -88,12 +88,12 @@ import { BookItemComponent } from './book-item.component';
 export class BookListComponent {
   private bookApiClient = inject(BookApiClient);
 
-  @Input() pageSize: number = 10;
+  readonly pageSize = input<number>(10);
   searchTimeout: any;
 
   searchTerm = signal<string>('');
   booksResource = rxResource({
-    params: () => ({ pageSize: this.pageSize, search: this.searchTerm() }),
+    params: () => ({ pageSize: this.pageSize(), search: this.searchTerm() }),
     stream: ({ params }) => this.bookApiClient.getBooks(params.pageSize, params.search),
     defaultValue: []
   });
