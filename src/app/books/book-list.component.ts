@@ -1,8 +1,9 @@
-import { Component, inject, signal, input } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { BookApiClient } from './book-api-client.service';
 import { BookItemComponent } from './book-item.component';
+import { BookStore } from './state/book-store';
 
 @Component({
   selector: 'app-book-list',
@@ -44,7 +45,7 @@ import { BookItemComponent } from './book-item.component';
 
       @if (booksResource.hasValue()) {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-          @for (book of booksResource.value(); track book.id) {
+          @for (book of books(); track book.id) {
             <app-book-item [book]="book"></app-book-item>
           } @empty {
             <div
@@ -86,12 +87,15 @@ import { BookItemComponent } from './book-item.component';
   `
 })
 export class BookListComponent {
+  private store = inject(BookStore);
   private bookApiClient = inject(BookApiClient);
 
   readonly pageSize = input<number>(10);
   searchTimeout: any;
 
   searchTerm = signal<string>('');
+  books = this.store.books;
+
   booksResource = rxResource({
     params: () => ({ pageSize: this.pageSize(), search: this.searchTerm() }),
     stream: ({ params }) => this.bookApiClient.getBooks(params.pageSize, params.search),
