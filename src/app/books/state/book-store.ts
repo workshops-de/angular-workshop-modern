@@ -2,8 +2,9 @@ import { patchState, signalStore, withComputed, withHooks, withMethods, withStat
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 
 import { computed, inject } from '@angular/core';
-import { debounceTime, pipe, switchMap, tap } from 'rxjs';
+import { debounceTime, exhaustMap, pipe, switchMap, tap } from 'rxjs';
 
+import { ToastService } from '../../shared/toast.service';
 import { Book } from '../book';
 import { BookApiClient } from '../book-api-client.service';
 
@@ -29,7 +30,7 @@ export const BookStore = signalStore(
   withComputed(store => ({
     bookByIdParam: computed(() => store.books().find(book => book.id === store.currentBookId()))
   })),
-  withMethods((store, client = inject(BookApiClient)) => ({
+  withMethods((store, client = inject(BookApiClient), toast = inject(ToastService)) => ({
     loadBooks: rxMethod<void>(
       pipe(
         tap(() => patchState(store, { isLoading: true })),
@@ -37,6 +38,22 @@ export const BookStore = signalStore(
         tap({
           next: books => patchState(store, { books, isLoading: false }),
           error: () => patchState(store, { isLoading: false })
+        })
+      )
+    ),
+    updateBook: rxMethod<Book>(
+      pipe(
+        tap(() => patchState(store, { isLoading: true })),
+        exhaustMap(book => client.updateBook(book)),
+        tap({
+          next: () => {
+            patchState(store, { isLoading: false });
+            toast.show('Book updated successfully!');
+          },
+          error: () => {
+            patchState(store, { isLoading: false });
+            toast.show('Error updating book. Please try again.', 5000);
+          }
         })
       )
     )
