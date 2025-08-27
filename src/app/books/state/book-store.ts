@@ -2,28 +2,32 @@ import { patchState, signalStore, withHooks, withMethods, withState } from '@ngr
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 
 import { inject } from '@angular/core';
-import { pipe, switchMap, tap } from 'rxjs';
+import { debounceTime, pipe, switchMap, tap } from 'rxjs';
 import { Book } from '../book';
 import { BookApiClient } from '../book-api-client.service';
 
 type BookStoreState = {
   isLoading: boolean;
   books: Book[];
+  searchTerm: string;
+  pageSize: number;
 };
 
 const initialState: BookStoreState = {
   isLoading: false,
-  books: []
+  books: [],
+  searchTerm: '',
+  pageSize: 10
 };
 
 export const BookStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
   withMethods((store, client = inject(BookApiClient)) => ({
-    loadBooks: rxMethod<{ pageSize: number; searchTerm: string }>(
+    loadBooks: rxMethod<void>(
       pipe(
         tap(() => patchState(store, { isLoading: true })),
-        switchMap(props => client.getBooks(props.pageSize, props.searchTerm)),
+        switchMap(() => client.getBooks(store.pageSize(), store.searchTerm())),
         tap({
           next: books => patchState(store, { books, isLoading: false }),
           error: () => patchState(store, { isLoading: false })
@@ -31,7 +35,20 @@ export const BookStore = signalStore(
       )
     )
   })),
+  withMethods(store => ({
+    search: rxMethod<{ searchTerm: string }>(
+      pipe(
+        debounceTime(300),
+        tap(({ searchTerm }) => patchState(store, { searchTerm })),
+        tap(() => store.loadBooks())
+      )
+    ),
+    clearSearch: () => {
+      patchState(store, { searchTerm: '' });
+      store.loadBooks();
+    }
+  })),
   withHooks(store => ({
-    onInit: () => store.loadBooks({ pageSize: 10, searchTerm: '' })
+    onInit: () => store.loadBooks()
   }))
 );
