@@ -1,7 +1,5 @@
-import { Component, inject, input, signal } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BookApiClient } from './book-api-client.service';
 import { BookItemComponent } from './book-item.component';
 import { BookStore } from './state/book-store';
 
@@ -32,7 +30,7 @@ import { BookStore } from './state/book-store';
         </div>
       </div>
 
-      @if (booksResource.isLoading()) {
+      @if (isLoading()) {
         <div class="flex justify-center items-center py-20">
           <div class="animate-pulse flex flex-col items-center">
             <div
@@ -43,9 +41,9 @@ import { BookStore } from './state/book-store';
         </div>
       }
 
-      @if (booksResource.hasValue()) {
+      @if (books(); as books) {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-          @for (book of books(); track book.id) {
+          @for (book of books; track book.id) {
             <app-book-item [book]="book"></app-book-item>
           } @empty {
             <div
@@ -86,21 +84,19 @@ import { BookStore } from './state/book-store';
     </div>
   `
 })
-export class BookListComponent {
+export class BookListComponent implements OnInit {
   private store = inject(BookStore);
-  private bookApiClient = inject(BookApiClient);
 
   readonly pageSize = input<number>(10);
   searchTimeout: any;
 
   searchTerm = signal<string>('');
   books = this.store.books;
+  isLoading = this.store.isLoading;
 
-  booksResource = rxResource({
-    params: () => ({ pageSize: this.pageSize(), search: this.searchTerm() }),
-    stream: ({ params }) => this.bookApiClient.getBooks(params.pageSize, params.search),
-    defaultValue: []
-  });
+  ngOnInit(): void {
+    this.store.loadBooks({ pageSize: this.pageSize(), searchTerm: '' });
+  }
 
   onSearchChange(newSearchTerm: string): void {
     // Debounce search to avoid too many API calls while typing
