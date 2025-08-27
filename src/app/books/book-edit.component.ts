@@ -1,4 +1,4 @@
-import { Component, ViewChild, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal, viewChild } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -172,7 +172,7 @@ export class BookEditComponent {
     defaultValue: {} as Book
   });
 
-  @ViewChild('bookForm') bookForm!: NgForm;
+  readonly bookForm = viewChild.required<NgForm>('bookForm');
 
   constructor() {
     effect(() => this.fillBookForForm());
@@ -180,7 +180,7 @@ export class BookEditComponent {
 
   onSubmit(): void {
     const book = this.book();
-    if (this.bookForm.invalid || !book) {
+    if (this.bookForm().invalid || !book) {
       return;
     }
 
