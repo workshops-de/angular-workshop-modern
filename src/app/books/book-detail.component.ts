@@ -1,8 +1,6 @@
-import { Component, computed, inject, input } from '@angular/core';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
-import { Book } from './book';
-import { BookApiClient } from './book-api-client.service';
+import { Component, effect, inject, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { BookStore } from './state/book-store';
 
 @Component({
   selector: 'app-book-detail',
@@ -10,7 +8,7 @@ import { BookApiClient } from './book-api-client.service';
   imports: [RouterLink],
   template: `
     <div class="container mx-auto px-4 py-12 max-w-4xl">
-      @if (bookResource.isLoading()) {
+      @if (isLoading()) {
         <div class="flex justify-center items-center py-20">
           <div class="animate-pulse flex flex-col items-center">
             <div
@@ -19,17 +17,7 @@ import { BookApiClient } from './book-api-client.service';
             <p class="mt-4 text-gray-600">Loading book details...</p>
           </div>
         </div>
-      } @else if (bookResource.error(); as error) {
-        <div class="p-6 text-center bg-red-50 rounded-lg">
-          <p class="text-red-700 font-medium text-lg mb-2">{{ error }}</p>
-          <button
-            (click)="goBack()"
-            class="mt-4 px-6 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-          >
-            Back to Books
-          </button>
-        </div>
-      } @else if (bookResource.value(); as book) {
+      } @else if (book(); as book) {
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
           <div class="flex flex-col md:flex-row">
             <div class="w-full md:w-1/3 bg-gray-100 p-6 flex items-center justify-center">
@@ -68,7 +56,7 @@ import { BookApiClient } from './book-api-client.service';
               }
               <div class="flex space-x-4">
                 <button
-                  (click)="goBack()"
+                  routerLink="/"
                   class="px-6 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
                 >
                   Back to Books
@@ -88,19 +76,14 @@ import { BookApiClient } from './book-api-client.service';
   `
 })
 export class BookDetailComponent {
-  private router = inject(Router);
-  private bookApiClient = inject(BookApiClient);
+  private store = inject(BookStore);
 
-  id = input<string>('');
+  protected book = this.store.bookByIdParam;
+  protected isLoading = this.store.isLoading;
 
-  bookDetails = computed(() => this.bookResource.value());
-  bookResource = rxResource({
-    params: () => ({ id: this.id() }),
-    stream: ({ params }) => this.bookApiClient.getBookById(params.id),
-    defaultValue: {} as Book
-  });
+  id = input('id');
 
-  goBack(): void {
-    this.router.navigate(['/']);
+  constructor() {
+    effect(() => this.store.setCurrentBookId(this.id()));
   }
 }
