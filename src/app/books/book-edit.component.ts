@@ -1,9 +1,8 @@
-import { Component, ViewChild, effect, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, ViewChild, effect, inject, input, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { tap } from 'rxjs';
+import { Router, RouterModule } from '@angular/router';
 import { ToastService } from '../shared/toast.service';
 import { Book } from './book';
 import { BookApiClient } from './book-api-client.service';
@@ -16,7 +15,7 @@ import { BookApiClient } from './book-api-client.service';
     <div class="container mx-auto px-4 py-12 max-w-4xl">
       <h1 class="text-3xl font-bold mb-10 text-blue-700 border-b pb-4 border-gray-200">Edit Book</h1>
 
-      @if (loading) {
+      @if (bookResource.isLoading()) {
         <div class="flex justify-center items-center py-20">
           <div class="animate-pulse flex flex-col items-center">
             <div
@@ -25,9 +24,7 @@ import { BookApiClient } from './book-api-client.service';
             <p class="mt-4 text-gray-600">Loading book...</p>
           </div>
         </div>
-      }
-
-      @if (!loading && error) {
+      } @else if (bookResource.error(); as error) {
         <div class="p-6 text-center bg-red-50 rounded-lg">
           <p class="text-red-700 font-medium text-lg mb-2">{{ error }}</p>
           <button
@@ -37,9 +34,7 @@ import { BookApiClient } from './book-api-client.service';
             Back to Books
           </button>
         </div>
-      }
-
-      @if (!loading && !error && book()) {
+      } @else if (bookResource.hasValue()) {
         <form #bookForm="ngForm" (ngSubmit)="onSubmit()" class="bg-white rounded-lg shadow-lg overflow-hidden p-8">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="md:col-span-2">
@@ -162,21 +157,20 @@ import { BookApiClient } from './book-api-client.service';
   `
 })
 export class BookEditComponent {
-  private route = inject(ActivatedRoute);
   private router = inject(Router);
   private bookApiClient = inject(BookApiClient);
   private toastService = inject(ToastService);
 
-  loading: boolean = true;
-  saving: boolean = false;
-  error: string | null = null;
+  id = input<string>('');
+
+  saving = false;
 
   book = signal<Book>({} as Book);
-  bookResource = toSignal(
-    this.bookApiClient
-      .getBookById(this.route.snapshot.paramMap.get('id') ?? '')
-      .pipe(tap({ next: () => (this.loading = false), error: () => (this.loading = false) }))
-  );
+  bookResource = rxResource({
+    params: () => ({ id: this.id() }),
+    stream: ({ params }) => this.bookApiClient.getBookById(params.id),
+    defaultValue: {} as Book
+  });
 
   @ViewChild('bookForm') bookForm!: NgForm;
 
@@ -209,7 +203,9 @@ export class BookEditComponent {
   }
 
   private fillBookForForm(): void {
-    const book = this.bookResource();
+    if (this.bookResource.isLoading()) return;
+
+    const book = this.bookResource.value();
 
     if (!book) return;
 
