@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, ViewChild, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -161,32 +161,27 @@ import { BookApiClient } from './book-api-client.service';
     </div>
   `
 })
-export class BookEditComponent implements OnInit {
+export class BookEditComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private bookApiClient = inject(BookApiClient);
   private toastService = inject(ToastService);
 
-  book = toSignal(
-    this.bookApiClient
-      .getBookById(this.route.snapshot.paramMap.get('id') ?? '')
-      .pipe(tap({ next: () => (this.loading = false), error: () => (this.loading = false) })),
-    { initialValue: {} as Book }
-  );
-
   loading: boolean = true;
   saving: boolean = false;
   error: string | null = null;
 
+  book = signal<Book>({} as Book);
+  bookResource = toSignal(
+    this.bookApiClient
+      .getBookById(this.route.snapshot.paramMap.get('id') ?? '')
+      .pipe(tap({ next: () => (this.loading = false), error: () => (this.loading = false) }))
+  );
+
   @ViewChild('bookForm') bookForm!: NgForm;
 
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.loading = false;
-      this.error = 'Book ID not found';
-      return;
-    }
+  constructor() {
+    effect(() => this.fillBookForForm());
   }
 
   onSubmit(): void {
@@ -210,6 +205,14 @@ export class BookEditComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/books', this.book()?.id || '']);
+    this.router.navigate(['/books', this.book().id]);
+  }
+
+  private fillBookForForm(): void {
+    const book = this.bookResource();
+
+    if (!book) return;
+
+    this.book.set(book);
   }
 }
