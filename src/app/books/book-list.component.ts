@@ -1,4 +1,4 @@
-import { Component, inject, input, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BookItemComponent } from './book-item.component';
 import { BookStore } from './state/book-store';
@@ -87,22 +87,15 @@ import { BookStore } from './state/book-store';
 export class BookListComponent {
   private store = inject(BookStore);
 
-  readonly pageSize = input<number>(10);
-  searchTimeout: any;
-
-  searchTerm = signal<string>('');
   books = this.store.books;
   isLoading = this.store.isLoading;
+  searchTerm = this.store.searchTerm;
 
   onSearchChange(newSearchTerm: string): void {
-    // Debounce search to avoid too many API calls while typing
-    clearTimeout(this.searchTimeout);
-    this.searchTimeout = setTimeout(() => {
-      this.searchTerm.set(newSearchTerm);
-    }, 300);
+    this.store.search({ searchTerm: newSearchTerm });
   }
 
   clearSearch(): void {
-    this.searchTerm.set('');
+    this.store.search({ searchTerm: '' });
   }
 }
