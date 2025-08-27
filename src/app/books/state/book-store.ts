@@ -1,4 +1,4 @@
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withHooks, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 
 import { inject } from '@angular/core';
@@ -30,5 +30,8 @@ export const BookStore = signalStore(
         })
       )
     )
+  })),
+  withHooks(store => ({
+    onInit: () => store.loadBooks({ pageSize: 10, searchTerm: '' })
   }))
 );

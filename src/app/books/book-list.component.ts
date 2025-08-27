@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BookItemComponent } from './book-item.component';
 import { BookStore } from './state/book-store';
@@ -84,7 +84,7 @@ import { BookStore } from './state/book-store';
     </div>
   `
 })
-export class BookListComponent implements OnInit {
+export class BookListComponent {
   private store = inject(BookStore);
 
   readonly pageSize = input<number>(10);
@@ -93,10 +93,6 @@ export class BookListComponent implements OnInit {
   searchTerm = signal<string>('');
   books = this.store.books;
   isLoading = this.store.isLoading;
-
-  ngOnInit(): void {
-    this.store.loadBooks({ pageSize: this.pageSize(), searchTerm: '' });
-  }
 
   onSearchChange(newSearchTerm: string): void {
     // Debounce search to avoid too many API calls while typing
