@@ -140,7 +140,7 @@ export class BookEditComponent {
 
   id = input<string>('');
 
-  isLoading = this.store.isLoading;
+  isLoading = this.store.loading;
 
   book = signal<Book>({} as Book);
 
