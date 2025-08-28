@@ -79,7 +79,7 @@ export class BookDetailComponent {
   private store = inject(BookStore);
 
   protected book = this.store.bookByIdParam;
-  protected isLoading = this.store.isLoading;
+  protected isLoading = this.store.loading;
 
   id = input('id');
 
