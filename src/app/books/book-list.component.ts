@@ -30,7 +30,7 @@ import { BookStore } from './state/book-store';
         </div>
       </div>
 
-      @if (isLoading()) {
+      @if (booksResource.isLoading()) {
         <div class="flex justify-center items-center py-20">
           <div class="animate-pulse flex flex-col items-center">
             <div
@@ -41,7 +41,7 @@ import { BookStore } from './state/book-store';
         </div>
       }
 
-      @if (books(); as books) {
+      @if (booksResource.value(); as books) {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
           @for (book of books; track book.id) {
             <app-book-item [book]="book"></app-book-item>
@@ -87,8 +87,7 @@ import { BookStore } from './state/book-store';
 export class BookListComponent {
   private store = inject(BookStore);
 
-  books = this.store.books;
-  isLoading = this.store.isLoading;
+  booksResource = this.store.booksResource;
   searchTerm = this.store.searchTerm;
 
   onSearchChange(newSearchTerm: string): void {
