@@ -44,7 +44,9 @@ import { BookStore } from './state/book-store';
       @if (booksResource.value(); as books) {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
           @for (book of books; track book.id) {
-            <app-book-item [book]="book"></app-book-item>
+            @defer (hydrate on hover) {
+              <app-book-item [book]="book"></app-book-item>
+            }
           } @empty {
             <div
               class="col-span-full flex flex-col items-center justify-center py-16 text-center bg-gray-50 rounded-xl"

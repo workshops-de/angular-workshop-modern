@@ -1,11 +1,11 @@
 import { Component, input } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Book } from './book';
 
 @Component({
   selector: 'app-book-item',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterLink],
   template: `
     <div
       class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full"
