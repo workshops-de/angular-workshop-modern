@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Book } from './book';
 
@@ -46,6 +46,12 @@ import { Book } from './book';
           >
             Edit Book
           </a>
+          <button
+            (click)="addToBasketClick.emit(book())"
+            class="block w-full text-center py-2 bg-orange-300 text-white rounded hover:bg-orange-400 transition-colors cursor-pointer"
+          >
+            Add to basket
+          </button>
         </div>
       </div>
     </div>
@@ -53,4 +59,6 @@ import { Book } from './book';
 })
 export class BookItemComponent {
   book = input.required<Book>();
+
+  addToBasketClick = output<Book>();
 }

@@ -1,12 +1,15 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Book } from './book';
 import { BookItemComponent } from './book-item.component';
+import { BookShoppingBasketComponent } from './book-shopping-basket.component';
+import { BookShoppingBasketStore, LineItem } from './state/book-shopping-basket-store';
 import { BookStore } from './state/book-store';
 
 @Component({
   selector: 'app-book-list',
   standalone: true,
-  imports: [FormsModule, BookItemComponent],
+  imports: [FormsModule, BookItemComponent, BookShoppingBasketComponent],
   template: `
     <div class="container mx-auto px-4 py-12 max-w-7xl">
       <h1 class="text-3xl font-bold mb-10 text-blue-700 border-b pb-4 border-gray-200">Book Collection</h1>
@@ -45,7 +48,7 @@ import { BookStore } from './state/book-store';
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
           @for (book of books; track book.id) {
             @defer (hydrate on hover) {
-              <app-book-item [book]="book"></app-book-item>
+              <app-book-item [book]="book" (addToBasketClick)="addBookToBasket($event)"></app-book-item>
             }
           } @empty {
             <div
@@ -84,19 +87,43 @@ import { BookStore } from './state/book-store';
         </div>
       }
     </div>
+
+    <hr />
+    @defer (when bookShoppingBasketContainsLineItems()) {
+      <app-book-shopping-basket />
+    } @placeholder {
+      <p>Add a book to your basket!</p>
+    }
   `
 })
 export class BookListComponent {
   private store = inject(BookStore);
+  private bookShoppingBasketStore = inject(BookShoppingBasketStore);
 
   booksResource = this.store.booksResource;
   searchTerm = this.store.searchTerm;
+
+  protected bookShoppingBasketContainsLineItems = this.bookShoppingBasketStore.hasLineItems;
 
   onSearchChange(newSearchTerm: string): void {
     this.store.search({ searchTerm: newSearchTerm });
   }
 
+  addBookToBasket(book: Book) {
+    const lineItem = this.toLineItemBook(book);
+
+    this.bookShoppingBasketStore.addLineItem(lineItem);
+  }
+
   clearSearch(): void {
     this.store.search({ searchTerm: '' });
+  }
+
+  private toLineItemBook(book: Book): LineItem {
+    return {
+      id: book.id,
+      title: book.title,
+      price: Number(book.price.replace('$', ''))
+    };
   }
 }
