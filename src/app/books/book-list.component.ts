@@ -48,7 +48,11 @@ import { BookStore } from './state/book-store';
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
           @for (book of books; track book.id) {
             @defer (hydrate on hover) {
-              <app-book-item [book]="book" (addToBasketClick)="addBookToBasket($event)"></app-book-item>
+              <app-book-item
+                [book]="book"
+                (addToBasketClick)="addBookToBasket($event)"
+                data-testid="book-item"
+              ></app-book-item>
             }
           } @empty {
             <div
@@ -92,7 +96,7 @@ import { BookStore } from './state/book-store';
     @defer (when bookShoppingBasketContainsLineItems()) {
       <app-book-shopping-basket />
     } @placeholder {
-      <p>Add a book to your basket!</p>
+      <p data-testid="book-shopping-basket-placeholder">Add a book to your basket!</p>
     }
   `
 })
