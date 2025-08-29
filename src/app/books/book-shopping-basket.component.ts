@@ -18,7 +18,9 @@ import { BookShoppingBasketStore } from './state/book-shopping-basket-store';
       }
     </ul>
 
-    <strong>Total: {{ store.total() }}</strong>
+    <strong
+      >Total: <span data-testid="shopping-basket-total">{{ store.total() }}</span></strong
+    >
   `
 })
 export class BookShoppingBasketComponent {

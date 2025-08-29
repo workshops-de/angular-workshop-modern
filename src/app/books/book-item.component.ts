@@ -49,6 +49,7 @@ import { Book } from './book';
           <button
             (click)="addToBasketClick.emit(book())"
             class="block w-full text-center py-2 bg-orange-300 text-white rounded hover:bg-orange-400 transition-colors cursor-pointer"
+            data-testid="add-to-basket-button"
           >
             Add to basket
           </button>
