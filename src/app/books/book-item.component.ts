@@ -59,7 +59,11 @@ import { Book } from './book';
   `
 })
 export class BookItemComponent {
-  book = input.required<Book>();
+  book = input<Book>({
+    title: 'n/a',
+    subtitle: 'n/a',
+    author: 'n/a'
+  } as Book);
 
   addToBasketClick = output<Book>();
 }
