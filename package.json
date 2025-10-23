@@ -32,17 +32,26 @@
   },
   "devDependencies": {
     "@analogjs/platform": "^1.22.1",
+    "@analogjs/vite-plugin-angular": "^1.22.1",
+    "@analogjs/vitest-angular": "^1.22.1",
     "@angular/build": "20.3.7",
     "@angular/cli": "20.3.7",
     "@angular/compiler-cli": "20.3.7",
     "@nx/devkit": "^21.6.6",
+    "@nx/vite": "^21.0.0",
     "@playwright/test": "^1.55.0",
     "@tailwindcss/postcss": "4.1.12",
+    "@testing-library/angular": "^18.1.0",
+    "@testing-library/dom": "^10.4.1",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
+    "jsdom": "^22.0.0",
     "postcss": "8.5.6",
     "prettier": "3.6.2",
     "tailwindcss": "4.1.12",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "vite": "^6.0.0",
+    "vite-tsconfig-paths": "^4.2.0",
+    "vitest": "^3.0.0"
   }
 }
