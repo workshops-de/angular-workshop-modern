@@ -21,7 +21,9 @@ import { Book } from './book';
         }
       </div>
       <div class="p-5 flex flex-col flex-grow">
-        <h2 class="text-lg font-semibold text-gray-800 mb-1 line-clamp-2">{{ book().title }}</h2>
+        <h2 class="text-lg font-semibold text-gray-800 mb-1 line-clamp-2" data-testid="book-title">
+          {{ book().title }}
+        </h2>
         @if (book().subtitle) {
           <p class="text-sm text-gray-600 mb-2 line-clamp-2">{{ book().subtitle }}</p>
         }
