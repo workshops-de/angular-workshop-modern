@@ -64,7 +64,7 @@ export function withBooks() {
       setCurrentBookId: (bookId: string | null) => patchState(store, { currentBookId: bookId })
     })),
     withHooks(store => ({
-      onInit: () => store.booksResource.reload()
+      // onInit: () => store.booksResource.reload()
     }))
   );
 }
