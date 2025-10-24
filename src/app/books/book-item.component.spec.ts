@@ -42,4 +42,28 @@ describe('<app-book-item>', () => {
       });
     });
   });
+
+  describe('effect', () => {
+    describe('When the details link is clicked', () => {
+      it('triggers a toast', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout'] });
+
+        const book = { title: 'Vitest - Angular Guide' } as Book;
+
+        TestBed.configureTestingModule({
+          providers: [provideRouter([])]
+        });
+
+        const fixture = TestBed.createComponent(BookItemComponent, { bindings: [inputBinding('book', () => book)] });
+
+        await vi.advanceTimersByTimeAsync(1000);
+        await fixture.whenStable();
+
+        const titleFixture = fixture.debugElement.query(By.css('[data-testid="book-title"]'));
+        const titleElement: HTMLElement = titleFixture.nativeElement;
+
+        expect(titleElement.innerHTML).toContain('Async update');
+      });
+    });
+  });
 });

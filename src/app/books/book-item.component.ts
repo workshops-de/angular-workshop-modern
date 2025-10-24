@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, effect, model, output, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Book } from './book';
 
@@ -61,11 +61,19 @@ import { Book } from './book';
   `
 })
 export class BookItemComponent {
-  book = input<Book>({
+  book = model<Book>({
     title: 'n/a',
     subtitle: 'n/a',
     author: 'n/a'
   } as Book);
 
   addToBasketClick = output<Book>();
+
+  constructor() {
+    effect(() => {
+      setTimeout(() => {
+        untracked(() => this.book.update(book => ({ ...book, title: 'Async update' })));
+      }, 1000);
+    });
+  }
 }
