@@ -172,3 +172,202 @@ describe('BookListComponent', () => {
     expect(mockBookApiClient.getBooks).toHaveBeenCalledWith(10, undefined);
   });
 });
+
+describe('BookListComponent - Search Debounce', () => {
+  let component: BookListComponent;
+  let fixture: ComponentFixture<BookListComponent>;
+  let mockBookApiClient: any;
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+
+    mockBookApiClient = {
+      getBooks: vi.fn().mockReturnValue(of([]))
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [BookListComponent],
+      providers: [
+        provideRouter([]),
+        { provide: BookApiClient, useValue: mockBookApiClient }
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(BookListComponent);
+    component = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('should bind search term to input', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.searchTerm = 'Angular';
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector('input[type="text"]') as HTMLInputElement;
+    expect(input.value).toBe('Angular');
+  });
+
+  it('should debounce search by 300ms', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    mockBookApiClient.getBooks.mockClear();
+
+    component.searchTerm = 'Angular';
+    component.onSearchChange();
+
+    expect(mockBookApiClient.getBooks).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(299);
+    expect(mockBookApiClient.getBooks).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(1);
+    expect(mockBookApiClient.getBooks).toHaveBeenCalledWith(10, 'Angular');
+  });
+
+  it('should cancel previous search when typing continues', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    mockBookApiClient.getBooks.mockClear();
+
+    component.searchTerm = 'Ang';
+    component.onSearchChange();
+    vi.advanceTimersByTime(100);
+
+    component.searchTerm = 'Angu';
+    component.onSearchChange();
+    vi.advanceTimersByTime(100);
+
+    component.searchTerm = 'Angular';
+    component.onSearchChange();
+    vi.advanceTimersByTime(300);
+
+    expect(mockBookApiClient.getBooks).toHaveBeenCalledTimes(1);
+    expect(mockBookApiClient.getBooks).toHaveBeenCalledWith(10, 'Angular');
+  });
+
+  it('should trigger search via input element', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    mockBookApiClient.getBooks.mockClear();
+
+    const input = fixture.nativeElement.querySelector('input[type="text"]') as HTMLInputElement;
+    input.value = 'TypeScript';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    vi.advanceTimersByTime(300);
+
+    expect(component.searchTerm).toBe('TypeScript');
+    expect(mockBookApiClient.getBooks).toHaveBeenCalledWith(10, 'TypeScript');
+  });
+
+  it('should clear search via clear button in DOM', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.searchTerm = 'test';
+    fixture.detectChanges();
+
+    const clearButtons = fixture.nativeElement.querySelectorAll('button');
+    const clearButton = Array.from(clearButtons).find((btn: any) => 
+      btn.querySelector('svg')
+    ) as HTMLButtonElement;
+
+    mockBookApiClient.getBooks.mockClear();
+
+    clearButton?.click();
+    fixture.detectChanges();
+
+    expect(component.searchTerm).toBe('');
+    expect(mockBookApiClient.getBooks).toHaveBeenCalledWith(10, undefined);
+  });
+
+  it('should show clear button only when search term exists', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    // Initially no search term
+    let clearButtons = fixture.nativeElement.querySelectorAll('button');
+    let clearButton = Array.from(clearButtons).find((btn: any) => 
+      btn.querySelector('svg')
+    );
+    expect(clearButton).toBeUndefined();
+
+    // With search term
+    component.searchTerm = 'test';
+    fixture.detectChanges();
+
+    clearButtons = fixture.nativeElement.querySelectorAll('button');
+    clearButton = Array.from(clearButtons).find((btn: any) => 
+      btn.querySelector('svg')
+    );
+    expect(clearButton).toBeTruthy();
+  });
+
+  it('should update books after search', async () => {
+    const initialBooks = createMockBooks(3);
+    const searchBooks = createMockBooks(2);
+    mockBookApiClient.getBooks.mockReturnValue(of(initialBooks));
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.books.length).toBe(3);
+
+    mockBookApiClient.getBooks.mockReturnValue(of(searchBooks));
+    component.searchTerm = 'Angular';
+    component.onSearchChange();
+
+    vi.advanceTimersByTime(300);
+    await fixture.whenStable();
+
+    expect(component.books.length).toBe(2);
+  });
+
+  it('should handle rapid searches correctly', async () => {
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    mockBookApiClient.getBooks.mockClear();
+
+    // Simulate rapid typing
+    for (let i = 0; i < 5; i++) {
+      component.searchTerm = 'A'.repeat(i + 1);
+      component.onSearchChange();
+      vi.advanceTimersByTime(50);
+    }
+
+    // Only advance the full debounce time after last input
+    vi.advanceTimersByTime(250);
+
+    // Should only call API once with the final search term
+    expect(mockBookApiClient.getBooks).toHaveBeenCalledTimes(1);
+    expect(mockBookApiClient.getBooks).toHaveBeenCalledWith(10, 'AAAAA');
+  });
+
+  it('should clear search and reload books', async () => {
+    const allBooks = createMockBooks(5);
+    mockBookApiClient.getBooks.mockReturnValue(of(allBooks));
+
+    component.searchTerm = 'Angular';
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    mockBookApiClient.getBooks.mockClear();
+
+    component.clearSearch();
+
+    expect(component.searchTerm).toBe('');
+    expect(mockBookApiClient.getBooks).toHaveBeenCalledWith(10, undefined);
+  });
+});
