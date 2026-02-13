@@ -14,11 +14,7 @@ describe('App Routing', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      providers: [
-        provideRouter(routes),
-        provideMockBookApiClient(),
-        provideMockToastService()
-      ]
+      providers: [provideRouter(routes), provideMockBookApiClient(), provideMockToastService()]
     }).compileComponents();
 
     router = TestBed.inject(Router);
