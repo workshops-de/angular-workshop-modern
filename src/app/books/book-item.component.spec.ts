@@ -2,24 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { BookItemComponent } from './book-item.component';
-import { Book } from './book';
-
-function createMockBook(overrides?: Partial<Book>): Book {
-  return {
-    isbn: '123456',
-    title: 'Test Book',
-    subtitle: 'A test subtitle',
-    author: 'Test Author',
-    publisher: 'Test Publisher',
-    price: '29.99',
-    numPages: 200,
-    cover: 'https://example.com/cover.jpg',
-    abstract: 'A test book',
-    id: '1',
-    userId: 1,
-    ...overrides
-  };
-}
+import { createMockBook } from '../../test-utils/book.factory';
 
 describe('BookItemComponent', () => {
   let component: BookItemComponent;
@@ -45,7 +28,7 @@ describe('BookItemComponent', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    
+
     expect(compiled.textContent).toContain('Test Book');
     expect(compiled.textContent).toContain('Test Author');
     expect(compiled.textContent).toContain('123456');
@@ -58,7 +41,7 @@ describe('BookItemComponent', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
     const img = compiled.querySelector('img');
-    
+
     expect(img).toBeNull();
     expect(compiled.textContent).toContain('No cover available');
   });
@@ -79,13 +62,10 @@ describe('BookItemComponent', () => {
     fixture.detectChanges();
 
     const links = fixture.nativeElement.querySelectorAll('a');
-    const detailLink = Array.from(links).find((link: any) => 
-      link.getAttribute('href')?.includes('/books/123') && 
-      !link.getAttribute('href')?.includes('/edit')
+    const detailLink = Array.from(links).find(
+      (link: any) => link.getAttribute('href')?.includes('/books/123') && !link.getAttribute('href')?.includes('/edit')
     );
-    const editLink = Array.from(links).find((link: any) => 
-      link.getAttribute('href')?.includes('/books/123/edit')
-    );
+    const editLink = Array.from(links).find((link: any) => link.getAttribute('href')?.includes('/books/123/edit'));
 
     expect(detailLink).toBeDefined();
     expect(editLink).toBeDefined();
@@ -102,7 +82,7 @@ describe('BookItemComponent', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    
+
     expect(compiled.textContent).toContain('Angular Deep Dive');
     expect(compiled.textContent).toContain('Jane Smith');
     expect(compiled.textContent).toContain('978-1234567890');
@@ -115,7 +95,7 @@ describe('BookItemComponent', () => {
     fixture.detectChanges();
 
     const img = fixture.nativeElement.querySelector('img');
-    
+
     expect(img).not.toBeNull();
     expect(img?.getAttribute('src')).toBe('https://example.com/book-cover.jpg');
     expect(img?.getAttribute('alt')).toBe('Test Book');

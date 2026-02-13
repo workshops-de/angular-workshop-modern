@@ -1,45 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, provideRouter } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { BookDetailComponent } from './book-detail.component';
 import { BookApiClient } from './book-api-client.service';
-import { Book } from './book';
-
-function createMockBook(overrides?: Partial<Book>): Book {
-  return {
-    id: '1',
-    isbn: '123456',
-    title: 'Test Book',
-    subtitle: 'A test subtitle',
-    author: 'Test Author',
-    publisher: 'Test Publisher',
-    price: '29.99',
-    numPages: 200,
-    cover: 'https://example.com/cover.jpg',
-    abstract: 'Test abstract',
-    userId: 1,
-    ...overrides
-  };
-}
+import { createMockBook, provideMockActivatedRoute } from '../../test-utils/book.factory';
 
 describe('BookDetailComponent', () => {
   let component: BookDetailComponent;
   let fixture: ComponentFixture<BookDetailComponent>;
   let mockBookApiClient: any;
-  let mockActivatedRoute: any;
 
   beforeEach(async () => {
     mockBookApiClient = {
       getBookById: vi.fn().mockReturnValue(of(createMockBook()))
-    };
-
-    mockActivatedRoute = {
-      snapshot: {
-        paramMap: {
-          get: vi.fn().mockReturnValue('1')
-        }
-      }
     };
 
     await TestBed.configureTestingModule({
@@ -47,7 +21,7 @@ describe('BookDetailComponent', () => {
       providers: [
         provideRouter([]),
         { provide: BookApiClient, useValue: mockBookApiClient },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        provideMockActivatedRoute({ id: '1' })
       ]
     }).compileComponents();
 
@@ -79,9 +53,7 @@ describe('BookDetailComponent', () => {
   });
 
   it('should handle error when loading fails', async () => {
-    mockBookApiClient.getBookById.mockReturnValue(
-      throwError(() => new Error('API Error'))
-    );
+    mockBookApiClient.getBookById.mockReturnValue(throwError(() => new Error('API Error')));
 
     fixture.detectChanges();
 
@@ -93,8 +65,20 @@ describe('BookDetailComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Could not load book details');
   });
 
-  it('should handle missing book ID', () => {
-    mockActivatedRoute.snapshot.paramMap.get.mockReturnValue(null);
+  it('should handle missing book ID', async () => {
+    // Reconfigure TestBed with no id parameter for this specific test
+    await TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({
+      imports: [BookDetailComponent],
+      providers: [
+        provideRouter([]),
+        { provide: BookApiClient, useValue: mockBookApiClient },
+        provideMockActivatedRoute({}) // No id parameter
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(BookDetailComponent);
+    component = fixture.componentInstance;
 
     fixture.detectChanges();
 

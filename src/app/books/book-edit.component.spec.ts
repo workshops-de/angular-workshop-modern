@@ -1,48 +1,22 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, provideRouter, Router } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { BookEditComponent } from './book-edit.component';
 import { BookApiClient } from './book-api-client.service';
 import { ToastService } from '../shared/toast.service';
-import { Book } from './book';
-
-function createMockBook(overrides?: Partial<Book>): Book {
-  return {
-    id: '1',
-    isbn: '123456',
-    title: 'Test Book',
-    subtitle: 'A subtitle',
-    author: 'Test Author',
-    publisher: 'Test Publisher',
-    price: '29.99',
-    numPages: 200,
-    cover: '',
-    abstract: 'Test abstract',
-    userId: 1,
-    ...overrides
-  };
-}
+import { createMockBook, provideMockActivatedRoute } from '../../test-utils/book.factory';
 
 describe('BookEditComponent - Form Validation', () => {
   let component: BookEditComponent;
   let fixture: ComponentFixture<BookEditComponent>;
   let mockBookApiClient: any;
-  let mockActivatedRoute: any;
   let mockToastService: any;
 
   beforeEach(async () => {
     mockBookApiClient = {
       getBookById: vi.fn().mockReturnValue(of(createMockBook())),
       updateBook: vi.fn().mockReturnValue(of(createMockBook()))
-    };
-
-    mockActivatedRoute = {
-      snapshot: {
-        paramMap: {
-          get: vi.fn().mockReturnValue('1')
-        }
-      }
     };
 
     mockToastService = {
@@ -54,7 +28,7 @@ describe('BookEditComponent - Form Validation', () => {
       providers: [
         provideRouter([]),
         { provide: BookApiClient, useValue: mockBookApiClient },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        provideMockActivatedRoute({ id: '1' }),
         { provide: ToastService, useValue: mockToastService }
       ]
     }).compileComponents();
@@ -175,7 +149,6 @@ describe('BookEditComponent - Form Submission', () => {
   let component: BookEditComponent;
   let fixture: ComponentFixture<BookEditComponent>;
   let mockBookApiClient: any;
-  let mockActivatedRoute: any;
   let mockToastService: any;
   let mockRouter: Router;
 
@@ -183,14 +156,6 @@ describe('BookEditComponent - Form Submission', () => {
     mockBookApiClient = {
       getBookById: vi.fn().mockReturnValue(of(createMockBook())),
       updateBook: vi.fn().mockReturnValue(of(createMockBook()))
-    };
-
-    mockActivatedRoute = {
-      snapshot: {
-        paramMap: {
-          get: vi.fn().mockReturnValue('1')
-        }
-      }
     };
 
     mockToastService = {
@@ -202,7 +167,7 @@ describe('BookEditComponent - Form Submission', () => {
       providers: [
         provideRouter([]),
         { provide: BookApiClient, useValue: mockBookApiClient },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        provideMockActivatedRoute({ id: '1' }),
         { provide: ToastService, useValue: mockToastService }
       ]
     }).compileComponents();
@@ -222,7 +187,7 @@ describe('BookEditComponent - Form Submission', () => {
 
     // Saving state is true immediately after onSubmit starts, but completes synchronously
     component.onSubmit();
-    
+
     // With synchronous observables (of()), the saving state completes immediately
     // So we check the final state and service calls
 
@@ -248,7 +213,7 @@ describe('BookEditComponent - Form Submission', () => {
     component.onSubmit();
 
     await fixture.whenStable();
-    
+
     expect(savingDuringCall).toBe(true);
     expect(component.saving).toBe(false);
   });
@@ -268,9 +233,7 @@ describe('BookEditComponent - Form Submission', () => {
   });
 
   it('should handle submission errors', async () => {
-    mockBookApiClient.updateBook.mockReturnValue(
-      throwError(() => new Error('Save failed'))
-    );
+    mockBookApiClient.updateBook.mockReturnValue(throwError(() => new Error('Save failed')));
 
     fixture.detectChanges();
     await fixture.whenStable();
@@ -280,10 +243,7 @@ describe('BookEditComponent - Form Submission', () => {
     await fixture.whenStable();
 
     expect(component.saving).toBe(false);
-    expect(mockToastService.show).toHaveBeenCalledWith(
-      'Error updating book. Please try again.',
-      5000
-    );
+    expect(mockToastService.show).toHaveBeenCalledWith('Error updating book. Please try again.', 5000);
   });
 
   it('should handle form submission via form submit event', async () => {
@@ -292,7 +252,7 @@ describe('BookEditComponent - Form Submission', () => {
 
     const form = fixture.nativeElement.querySelector('form');
     form.dispatchEvent(new Event('submit'));
-    
+
     await fixture.whenStable();
 
     expect(mockBookApiClient.updateBook).toHaveBeenCalled();
@@ -312,7 +272,7 @@ describe('BookEditComponent - Form Submission', () => {
     await fixture.whenStable();
 
     component.onSubmit();
-    
+
     await fixture.whenStable();
 
     expect(mockToastService.show).toHaveBeenCalledTimes(1);

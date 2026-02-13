@@ -4,34 +4,7 @@ import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { BookListComponent } from './book-list.component';
 import { BookApiClient } from './book-api-client.service';
-import { Book } from './book';
-
-function createMockBook(overrides?: Partial<Book>): Book {
-  return {
-    id: '1',
-    isbn: '123456',
-    title: 'Test Book',
-    subtitle: 'Test Subtitle',
-    author: 'Test Author',
-    publisher: 'Test Publisher',
-    price: '29.99',
-    numPages: 200,
-    cover: '',
-    abstract: 'Test abstract',
-    userId: 1,
-    ...overrides
-  };
-}
-
-function createMockBooks(count: number): Book[] {
-  return Array.from({ length: count }, (_, i) => 
-    createMockBook({
-      id: String(i + 1),
-      isbn: `ISBN${i + 1}`,
-      title: `Book ${i + 1}`
-    })
-  );
-}
+import { createMockBook, createMockBooks } from '../../test-utils/book.factory';
 
 describe('BookListComponent', () => {
   let component: BookListComponent;
@@ -45,10 +18,7 @@ describe('BookListComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [BookListComponent],
-      providers: [
-        provideRouter([]),
-        { provide: BookApiClient, useValue: mockBookApiClient }
-      ]
+      providers: [provideRouter([]), { provide: BookApiClient, useValue: mockBookApiClient }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(BookListComponent);
@@ -81,7 +51,7 @@ describe('BookListComponent', () => {
 
     const bookItems = fixture.nativeElement.querySelectorAll('app-book-item');
     expect(bookItems.length).toBe(3);
-    
+
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Book 1');
     expect(compiled.textContent).toContain('Book 2');
@@ -93,11 +63,11 @@ describe('BookListComponent', () => {
 
     // Check loading state before observable completes
     expect(component.loading).toBe(true);
-    
+
     // Detect changes but loading state is checked before completion in the template
     // With synchronous observables, we need to check before detectChanges
     const compiled = fixture.nativeElement as HTMLElement;
-    
+
     // Since the observable completes synchronously, we cannot easily capture loading state in DOM
     // Instead, we verify the component's loading property is initially true
     expect(component.loading).toBe(true);
@@ -128,9 +98,7 @@ describe('BookListComponent', () => {
   });
 
   it('should handle loading errors', async () => {
-    mockBookApiClient.getBooks.mockReturnValue(
-      throwError(() => new Error('API Error'))
-    );
+    mockBookApiClient.getBooks.mockReturnValue(throwError(() => new Error('API Error')));
 
     fixture.detectChanges();
     await fixture.whenStable();
@@ -145,7 +113,7 @@ describe('BookListComponent', () => {
 
     // Set pageSize input
     fixture.componentRef.setInput('pageSize', 20);
-    
+
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -187,10 +155,7 @@ describe('BookListComponent - Search Debounce', () => {
 
     await TestBed.configureTestingModule({
       imports: [BookListComponent],
-      providers: [
-        provideRouter([]),
-        { provide: BookApiClient, useValue: mockBookApiClient }
-      ]
+      providers: [provideRouter([]), { provide: BookApiClient, useValue: mockBookApiClient }]
     }).compileComponents();
 
     fixture = TestBed.createComponent(BookListComponent);
@@ -279,9 +244,7 @@ describe('BookListComponent - Search Debounce', () => {
     fixture.detectChanges();
 
     const clearButtons = fixture.nativeElement.querySelectorAll('button');
-    const clearButton = Array.from(clearButtons).find((btn: any) => 
-      btn.querySelector('svg')
-    ) as HTMLButtonElement;
+    const clearButton = Array.from(clearButtons).find((btn: any) => btn.querySelector('svg')) as HTMLButtonElement;
 
     mockBookApiClient.getBooks.mockClear();
 
@@ -298,9 +261,7 @@ describe('BookListComponent - Search Debounce', () => {
 
     // Initially no search term
     let clearButtons = fixture.nativeElement.querySelectorAll('button');
-    let clearButton = Array.from(clearButtons).find((btn: any) => 
-      btn.querySelector('svg')
-    );
+    let clearButton = Array.from(clearButtons).find((btn: any) => btn.querySelector('svg'));
     expect(clearButton).toBeUndefined();
 
     // With search term
@@ -308,9 +269,7 @@ describe('BookListComponent - Search Debounce', () => {
     fixture.detectChanges();
 
     clearButtons = fixture.nativeElement.querySelectorAll('button');
-    clearButton = Array.from(clearButtons).find((btn: any) => 
-      btn.querySelector('svg')
-    );
+    clearButton = Array.from(clearButtons).find((btn: any) => btn.querySelector('svg'));
     expect(clearButton).toBeTruthy();
   });
 

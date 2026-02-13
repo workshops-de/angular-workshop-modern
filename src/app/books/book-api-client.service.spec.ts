@@ -11,10 +11,7 @@ describe('BookApiClient', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting()
-      ]
+      providers: [provideHttpClient(), provideHttpClientTesting()]
     });
 
     service = TestBed.inject(BookApiClient);
@@ -57,9 +54,7 @@ describe('BookApiClient', () => {
   it('should include search term in query parameters', () => {
     service.getBooks(10, 'angular').subscribe();
 
-    const req = httpMock.expectOne(
-      'http://localhost:4730/books?_limit=10&q=angular'
-    );
+    const req = httpMock.expectOne('http://localhost:4730/books?_limit=10&q=angular');
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });
@@ -116,7 +111,7 @@ describe('BookApiClient', () => {
 
     service.getBookById('invalid').subscribe({
       next: () => expect.fail('should have failed'),
-      error: (error) => {
+      error: error => {
         expect(error.status).toBe(404);
       }
     });

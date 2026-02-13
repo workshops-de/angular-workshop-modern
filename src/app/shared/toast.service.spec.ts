@@ -13,10 +13,7 @@ describe('ToastService', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [
-        ToastService,
-        { provide: MatSnackBar, useValue: snackBarSpy }
-      ]
+      providers: [ToastService, { provide: MatSnackBar, useValue: snackBarSpy }]
     });
 
     service = TestBed.inject(ToastService);
@@ -29,20 +26,12 @@ describe('ToastService', () => {
   it('should show toast message with default duration', () => {
     service.show('Test message');
 
-    expect(snackBarSpy.open).toHaveBeenCalledWith(
-      'Test message',
-      'Close',
-      { duration: 3000 }
-    );
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Test message', 'Close', { duration: 3000 });
   });
 
   it('should show toast message with custom duration', () => {
     service.show('Custom message', 5000);
 
-    expect(snackBarSpy.open).toHaveBeenCalledWith(
-      'Custom message',
-      'Close',
-      { duration: 5000 }
-    );
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Custom message', 'Close', { duration: 5000 });
   });
 });
