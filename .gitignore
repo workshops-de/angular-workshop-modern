@@ -30,12 +30,16 @@ yarn-error.log
 
 # Miscellaneous
 /.angular/cache
+.angular*/
+.cursor*/
 .sass-cache/
 /connect.lock
 /coverage
 /libpeerconnection.log
 testem.log
 /typings
+vite.config*.mts.timestamp*
+**/vite.config*2.mts
 
 # System files
 .DS_Store
